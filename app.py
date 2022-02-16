@@ -1,8 +1,6 @@
 from difflib import get_close_matches
 import mysql.connector
-
-# creating a dict out of the data.json file
-# data = json.load(open("data.json"))
+from flask import Flask
 
 # connecting to the database
 con = mysql.connector.connect(
@@ -18,15 +16,15 @@ query1 = cursor.execute("SELECT Expression from Dictionary")
 keys = [b[0] for b in cursor.fetchall()]
 
 # function that finds the def of word
-def meaning(w):
+def meaning(word):
     # cursor = con.cursor()
-    query2 = cursor.execute("SELECT * FROM Dictionary WHERE Expression = '{}'".format(w))
+    query2 = cursor.execute("SELECT * FROM Dictionary WHERE Expression = '{}'".format(word))
     results = cursor.fetchall()
 
     if results != []:
         return results
-    elif results == [] and len(get_close_matches(w, keys)) > 0:
-        maybe = get_close_matches(w, keys)[0]
+    elif results == [] and len(get_close_matches(word, keys)) > 0:
+        maybe = get_close_matches(word, keys)[0]
         yn = input("Did you mean %s instead? (Y/N) " % maybe).lower()
         if yn == "y":
             query3 = cursor.execute("SELECT * FROM Dictionary WHERE Expression = '{}'".format(maybe))
@@ -36,25 +34,6 @@ def meaning(w):
             return "The word does not exist in the Dictionary!"
     else:
         return "The word does not exist in the Dictionary!"
-
-#    w = w.lower()
-#    if w in data:
-#        return data[w]
-#    elif w.title() in data:
-#        return data[w.title()]
-#    elif w.upper() in data:
-#        return data[w.upper()]
-#    elif len(get_close_matches(w, data.keys())) > 0:
-#        maybe = get_close_matches(w, data.keys())[0]
-#        yn = input("Did you mean %s instead? (Y/N) " % maybe).lower()
-#        if yn == "y":
-#            return data[maybe]
-#        elif yn == "n":
-#            return "The word does not exist in the Dictionary!"
-#        else:
-#            return "We didn't unserstand what you entered."
-#    else:
-#        return "The word does not exist in the Dictionary!"
 
 # get user word and print its def
 while True:
@@ -69,3 +48,12 @@ while True:
 
     if(input("Do you want to continue? (Y/N) ").lower() == "n"):
         break
+
+app = Flask(__name__)
+
+if __name__ == "__main__":
+    app.run()
+
+@app.route("/")
+def home():
+    return "Hello this is a test!"
